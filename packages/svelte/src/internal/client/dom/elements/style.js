@@ -16,6 +16,9 @@ function update_styles(dom, prev = {}, next, priority) {
 			if (next[key] == null) {
 				dom.style.removeProperty(key);
 			} else {
+				if (typeof value === 'string') {
+					value = value.replace(/\s*;\s*$/, '');
+				}
 				dom.style.setProperty(key, value, priority);
 			}
 		}

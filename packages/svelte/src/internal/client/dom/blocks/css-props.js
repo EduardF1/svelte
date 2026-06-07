@@ -19,6 +19,9 @@ export function css_props(element, get_styles) {
 			var value = styles[key];
 
 			if (value) {
+				if (typeof value === 'string') {
+					value = value.replace(/\s*;\s*$/, '');
+				}
 				element.style.setProperty(key, value);
 			} else {
 				element.style.removeProperty(key);
