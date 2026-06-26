@@ -98,21 +98,21 @@ Instead of `beforeUpdate` use `$effect.pre` and instead of `afterUpdate` use `$e
 
 ### Chat window example
 
-To implement a chat window that autoscrolls to the bottom when new messages appear (but only if you were _already_ scrolled to the bottom), we need to measure the DOM before we update it.
+To implement a chat window that autoscrolls to the bottom when new messages appear (but only if you were _already_ scrolled to the bottom), we track scroll position via an `onscroll` handler and use `$effect` to scroll when messages change.
 
 In Svelte 4, we do this with `beforeUpdate`, but this is a flawed approach — it fires before _every_ update, whether it's relevant or not. In the example below, we need to introduce checks like `updatingMessages` to make sure we don't mess with the scroll position when someone toggles dark mode.
 
-With runes, we can use `$effect.pre`, which behaves the same as `$effect` but runs before the DOM is updated. As long as we explicitly reference `messages` inside the effect body, it will run whenever `messages` changes, but _not_ when `theme` changes.
+With runes, we track whether the user is at the bottom via an `onscroll` handler and react to `messages` changes with `$effect`. As long as we explicitly reference `messages` inside the effect body, it will run whenever `messages` changes, but _not_ when `theme` changes. This approach also works correctly in experimental async mode, where `$effect.pre` runs after the DOM has been updated.
 
 `beforeUpdate`, and its equally troublesome counterpart `afterUpdate`, are therefore deprecated in Svelte 5.
 
 - [Before](/playground/untitled#H4sIAAAAAAAAE31WXa_bNgz9K6yL1QmWOLlrC-w6H8MeBgwY9tY9NfdBtmlbiywZkpyPBfnvo2zLcZK28AWuRPGI5OGhkEuQc4EmiL9eAskqDOLg97oOZoE9125jDigs0t6oRqfOsjap5rXd7uTO8qpW2sIFEsyVxn_qjFmcAcstar-xPN3DFXKtKgi768IVgQku0ELj3Lgs_kZjWIEGNpAzYXDlHWyJFZI1zJjeh4O5uvl_DY8oUkVeVoFuJKYls-_CGYS25Aboj0EtWNqel0wWoBoLTGZgmdgDS9zW4Uz4NsrswPHoyutN4xInkylstnBxdmIhh8m7xzqmoNE2Wq46n1RJQzEbq4g-JQSl7e-HDx-GdaTy3KD9E3lRWvj5Zu9QX1QN20dj7zyHz8s-1S6lW7Cpz3RnXTcm04hIlfdFuO8p2mQ5-3a06cqjrn559bF_2NHOnRZ5I1PLlXQNyQT-hedMHeUEDyjtdMxsa4n2eIbNhlTwhyRthaOKOmYtniwF6pwt0wXa6MBEg0OibZec27gz_dk3UrZ6hB2LLYoiv521Yd8Gt-foTrfhiCDP0lC9VUUhcDLU49Xe_9943cNvEArHfAjxeBTovvXiNpFynfEDpIIZs9kFbg52QbeNHWZzebz32s7xHco3nJAJl1nshmhz8dYOQJDyZetnbb2gTWe-vEeWlrfpZMavr56ldb29eNt6UXvgwgFbp_WC0tl2RK25rGk6lYz3nUI2lzvBXGHhPZPGWmKUXFNBKqdaW259wl_aHbiqoVIZdpE60Nax6IOujT0LbFFxIVTCxCRR2XloUcYNvSbnGHKBp763jHoj59xiZWJI0Wm0P_m3MSS985xkasn-cFq20xTDy3J5KFcjgUTD69BHdcHIjz431z28IqlxGcPSfdFnrGDZn6gD6lyo45zyHAD-btczf-98nhQxHEvKfeUtOVkSejD3q-9X7JbzjGtsdUxlKdFU8qGsT78uaw848syWMXz85Waq2Gnem4mAn3prweq4q6Y3JEpnqMmnPoFRgmd3ySW0LLRqSKlwYHriCvJvUs2yjMaaoA-XzTXLeGMe45zmhv_XAno3Mj0xF7USuqNvnE9H343QHlq-eAgxpbTPNR9yzUkgLjwSR0NK4wKoxy-jDg-9vy8sUSToakzW-9fX13Em9Q8T6Z26uZhBN36XUYo5q7ggLXBZoub2Ofv7g6GCZfTxe034NCjiudXj7Omla0eTfo7QBPOcYxbE7qG-vl3_B1G-_i_JCAAA)
-- [After](/playground/untitled#H4sIAAAAAAAAE31WXa-jNhD9K7PsdknUQJLurtRLPqo-VKrU1327uQ8GBnBjbGSb5KZR_nvHgMlXtyIS9njO-MyZGZRzUHCBJkhez4FkNQZJ8HvTBLPAnhq3MQcUFmlvVKszZ1mbTPPGbndyZ3ndKG3hDJZne7hAoVUNYY8JV-RBPgIt2AprhA18MpZZnIQ50_twuvLHNRrDSjRXj9fwiCJTBLIKdCsxq5j9EM4gtBU3QD8GjWBZd14xWYJqLTCZg2ViDyx1W4cz4dv0hsiB49FRHkyfsCgws3GjcTKZwmYLZ2feWc9o1W8zJQ2Fb62i5JUQRNRHgs-fx3WsisKg_RN5WVn4-WrvUd9VA9tH4-AcwbfFQIpkLWByvWzqSe2sk3kyjUlOec_XPU-3TRaz_75tuvKoi19e3OvipSpamVmupJM2F_gXnnJ1lBM8oLQjHceys8R7PMFms4HwD2lRhzeEe-EsvluSrHe2TJdo4wMTLY48XKwPzm0KGm2r5ajFtRYU4TWOY7-ddWHfxhDP0QkQhnf5PWRnVVkKnIx8fZsOb5dR16nwG4TCCRdCMphWQ7z1_DoOcp3zA2SCGbPZBa5jd0G_TRxmc36Me-mG6A7l60XIlMs8ce2-OXtrDyBItdz6qVjPadObzx-RZdV1nJjx64tXad1sz962njceOHfAzmk9JzrbXqg1lw3NkZL7vgE257t-uMDcO6attSSokpmgFqVMO2U93e_dDlzOUKsc-3t6zNZp6K9cG3sS2KGSUqiUiUmq8tNYoJwbmvpTAoXA96GyjCojI26xNglk6DpwOPm7NdRYp4ia0JL94bTqRiGB5WJxqFY37RGPoz3c6i4jP3rcUA7wmhqNywQW7om_YQ2L4UQdUBdCHSPiOQJ8bFcxHzeK0jKBY0XcV95SkCWlD9t-9eOM3TLKucauiyktJdpaPqT19ddF4wFHntsqgS-_XE01e48GMwnw02AtWZP02QyGVOkcNfk072CU4PkduZSWpVYt9SkcmJ64hPwHpWF5ziVls3wIFmmW89Y83vMeGf5PBxjcyPSkXNy10J18t3x6-a6CDtBq6SGklNKeazFyLahB3PVIGo2UbhOgGi9vKjzW_j6xVFFD17difXx5ebll0vwvkcGpn4sZ9MN3vqFYsJoL6gUuK9TcPrO_PxgzWMRfflSEr2NHPJf6lj1957rRpH8CNMG84JgHidUtXt4u_wK21LXERAgAAA==)
+- [After](/playground/untitled#H4sIAAAAAAAC_31VXa-iSBD9KzXObNCMoO7MJHNRnOzDJpvs63273ocGCui16SZ0o9cl_vepBhrRu7PRRLq6Pk7VOYXtLOMC9Sx8aWeSlTgLZ39U1Ww5M5fKHvQJhUE6a9XUibXsdFLzyuwP8mAEGjAFlggRfNKGGZx7KauP3mLrrkvUmuWobx4v3hlFoijIKKgbiUnBzAdvCZ4puAb6MqgES7r7gskcVGOAyRQME0dgsT3aOO29dnWGSieO50rVZmJijVEEVwlB5U3d4HD3CbMMEzOfLyDaQ2tNB-OQbvsjz2B-i184r4NxdX4E_dWzmq-XY_XB-BfyvDCLIdfV_lwd2KyRieFK2uZSgX_jJVVnOccTSjPWseU7S3DEC0RRBN6f0mDtTZAkSmoiAN8Mtdc7G1bnaIITE32zxuX6YN0WUKNpajkAmXZNGV6CIHDHZZf2dUzxPjsFeN5dfw_dGZXnAucjXieU4dd21GkFfoAn7LQ8CAfTdsi3W93EJncpP0EimNbRYWY1c5j1x9DGRO1j3msn0bsoRxJFxlymoRVc1DrrFWieHXtROyjjXkEjxyrLNJqeY_j8yP2zqmD_34IAH76tt3DtsRG6YrN3K7Bb0aE3tx-RJcVtd5h2z1dHyK7at862W1UucGUDO6fdijrf95zsuKxoaZQ89lqL2jvpXWHlHOPGGOJOyUTwxA61I9HBfe5OYMcLpUqxr9PH7C1druROm4vALirMhYqZmMcqvYxaSLmmFb-EkAl8G0TESATS5wZLHUKCVuzDzT-NJg1ffNK7IfvDbdFNNoTNen0qthMlBo4CV9UWIz_6WFqH8JI0zWUIa_sJvmEJ6-FGnbDOhDr7hHMMcLktYy6v78d5COeCsG-dJSNLTG-x4_bXHdtHP-U1dgtDbSnRlPKhra_f15ULOPPUFCF8-f1mKtmbP5hpAL8N1pxVYd_NYIhVnWJNPtUbaCV4egcupse8Vg2tBJxYPbcNuXdXxdKUS-pm85DMr1nKG_1Y583X_N8uYHAj07vJBZ2E7sY3xdOP7zbQIbTYuBCalKod1mzEmpFAbHmkGY2Qpg0Qx5sJwyP3943FigRdTof18enpaYqk-l8gg1O_F0vol6-dQMxYyQVpgcsCa27eo7-_GDtYB19-RcLXURHvqZ6ip1dqt5r0l04bzDOO6Sy0f43X1-tPP4qe9g0IAAA=)
 
 <!-- prettier-ignore -->
 ```svelte
 <script>
-	import { ---beforeUpdate, afterUpdate,--- tick } from 'svelte';
+	---import { beforeUpdate, afterUpdate, tick } from 'svelte';---
 
 	---let updatingMessages = false;---
 	let theme = +++$state('dark')+++;
@@ -120,20 +120,24 @@ With runes, we can use `$effect.pre`, which behaves the same as `$effect` but ru
 
 	let viewport;
 
+	+++let autoscroll = true;+++
+
 	---beforeUpdate(() => {---
-	+++$effect.pre(() => {+++
-		---if (!updatingMessages) return;---
+	---	if (!updatingMessages) return;---
+	---	const autoscroll = viewport && viewport.offsetHeight + viewport.scrollTop > viewport.scrollHeight - 50;---
+	---	if (autoscroll) {---
+	---		tick().then(() => {---
+	---			viewport.scrollTo(0, viewport.scrollHeight);---
+	---		});---
+	---	}---
+	---	updatingMessages = false;---
+	---});---
+	+++$effect(() => {+++
 		+++messages;+++
-		const autoscroll = viewport && viewport.offsetHeight + viewport.scrollTop > viewport.scrollHeight - 50;
-
-		if (autoscroll) {
-			tick().then(() => {
-				viewport.scrollTo(0, viewport.scrollHeight);
-			});
-		}
-
-		---updatingMessages = false;---
-	});
+		+++if (autoscroll) {+++
+			+++viewport?.scrollTo(0, viewport.scrollHeight);+++
+		+++}+++
+	+++});+++
 
 	function handleKeydown(event) {
 		if (event.key === 'Enter') {
@@ -152,7 +156,7 @@ With runes, we can use `$effect.pre`, which behaves the same as `$effect` but ru
 </script>
 
 <div class:dark={theme === 'dark'}>
-	<div bind:this={viewport}>
+	<div bind:this={viewport} +++onscroll={() => { autoscroll = viewport.offsetHeight + viewport.scrollTop > viewport.scrollHeight - 50; }}+++>
 		{#each messages as message}
 			<p>{message}</p>
 		{/each}
